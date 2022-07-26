@@ -1,6 +1,15 @@
 (function () {
     'use strict';
-    const OPEN_WEATHER_APPID = TREVORS_WEATHER_MAP_KEY;
+
+    const showPosition = (position) => {
+        console.log(position);
+        return (position.coords.latitude + position.coords.longitude);
+    }
+
+    if(navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(showPosition);
+    }
+
     mapboxgl.accessToken = TREVORS_MAP_TOKEN;
     const OPTIMAL_ZOOM_LEVEL = 20;
     const STARTING_COORDS = [-98.4936, 29.4241];
@@ -8,7 +17,7 @@
     let dailyWeatherInfo = [];
     let compassHeading;
 
-    var weatherOptions = {
+    let weatherOptions = {
         lat: 29.4241, /* i want coords to feed from map center */
         lon: -98.4936,
         appid: TREVORS_WEATHER_MAP_KEY,
@@ -17,14 +26,14 @@
 
     const map = new mapboxgl.Map({
         container: 'mapDiv', // container ID
-        style: 'mapbox://styles/mapbox/dark-v10', // style URL
+        style: 'mapbox://styles/mapbox/streets-v11', // style URL
         center: [-98.4861, 29.4260], // starting position [lng, lat]
         zoom: 11 // starting zoom
     });
 
 ////// CENTERS MAP AND SETS MARKER AT CENTER WHEN MAP STOPS MOVING, ALLOWS MARKER TO BE SET USING MAPBOX GEOCODE CONTROL ///////
     function onMoveEnd() {
-        var coords = map.getCenter();
+        let coords = map.getCenter();
         marker.setLngLat(coords);
         makePopUpForCoords(coords)
         // console.log(coords);
@@ -36,17 +45,18 @@
 
     ////////MAPBOX GEOCODE CONTROLLER, COPIED DIRECTLY FROM WEBSITE//////////
 
-    map.addControl(
-        new MapboxGeocoder({
-            accessToken: mapboxgl.accessToken,
+    const geoCoder = new MapboxGeocoder({
+            accessToken: TREVORS_MAP_TOKEN,
             zoom: OPTIMAL_ZOOM_LEVEL,
-            placeholder: 'Search Box',
+            placeholder: 'Weather Search',
             mapboxgl: mapboxgl,
-            marker: false,
-        })
-    );
 
-    var marker = new mapboxgl.Marker({
+        })
+
+    $('#searchBox').append(geoCoder.onAdd(map));
+
+
+    let marker = new mapboxgl.Marker({
         draggable: true
     })
         .setLngLat(STARTING_COORDS)
@@ -68,7 +78,7 @@
     /* POPUP AND ATTACHMENT TO COORDS */
 
     function makePopUpForCoords(coords) {
-        console.log(coords);
+        // console.log(coords);
         /* coords from MAPBOX are an object, need to convert to array */
         const coordArray = [coords.lng, coords.lat];
         const popup = new mapboxgl.Popup({closeOnClick: false})
@@ -98,14 +108,14 @@
         $(`#cardStack`).html('');
         weather.forEach(function (day) {
             console.log(day);
-            var dailyHTML = createDailyForecastHTML(day);
+            let dailyHTML = createDailyForecastHTML(day);
             $(`#cardStack`).append(dailyHTML);
         })
 
     }
 
     function degToCompass(num) {
-        var val = Math.floor((num / 22.5) + 0.5);
+        let val = Math.floor((num / 22.5) + 0.5);
         compassHeading = ["N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"];
         return compassHeading[(val % 16)];
     }
@@ -118,7 +128,6 @@
         var windSpeed = (parseInt(singleDay.wind_speed));
         var windHeading = singleDay.wind_deg;
         var weatherIcon = `<img  src='http://openweathermap.org/img/wn/${singleDay.weather[0].icon}@2x.png' alt={cccc}>`
-        // degToCompass(windHeading);
         var sunsetTime = new Date(singleDay.sunset * 1000).toString();
         var sunSet = sunsetTime.slice(16,21);
         var sunriseTime = new Date(singleDay.sunrise * 1000).toString();
@@ -126,16 +135,16 @@
         var inchesOfMercury = (singleDay.pressure * 0.0295301).toFixed(2);
         // language = HTML
         var html = `
-			<div class="col-3">
+			<div class="col-12 col-sm-6 col-lg-3">
 				
-				<div id="cardBody" class="card-body">
+				<div id="cardBody" class="card-body clear">
 				    <div id="dayOfWeek" class="card-body">${dayOfWeek}</div>
 					<div id="highLow">H:${parsedHighTemp}°F / L:${parsedLowTemp}°F</div>
 					<div id="icon">${weatherIcon}</div>
 					<div id="forecast">${singleDay.weather[0].description}</div>
-					<div id="wind">${windSpeed} mph / ${degToCompass(windHeading)}</div>
-					<div id="pressure">${inchesOfMercury}" inHg</div>
-					<div id="sun">${sunRise}/${sunSet}</div>
+					<div id="wind">Wind: ${windSpeed} mph / ${degToCompass(windHeading)}</div>
+					<div id="pressure">Barometer: ${inchesOfMercury} inHg</div>
+					<div id="sun">Dawn: ${sunRise} -- Dusk: ${sunSet}</div>
 				</div>
 			</div>`
 
@@ -143,26 +152,23 @@
         return html;
 
     }
-
-
-
-
-
-
-
-
-
+    // Function to set the card backgrounds
+// This is done with the icons
+    function setCardBackground(icon) {
+        if (icon === '13d') {
+            return 'snow' //snow
+        } else if (icon === '09D' || icon === '10d') {
+            return 'rain' // rain
+        } else if ( icon === '11d') {
+            return 'storm'
+        } else if (icon === '02d' || icon === '04d' || icon === '05d') {
+            return 'cloudy' // cloud
+        } else if (icon === '01n') {
+            return 'stars'
+        } else {
+            return 'clear' // clear
+        }
+    }
 
 })();
 
-
-// ////////USE THIS FUNCTION TO CONVERT DEGREES TO HEADING///////////
-// function degToCompass(num) {
-//     var val = Math.floor((num / 22.5) + 0.5);
-//     var arr = ["N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"];
-//     return arr[(val % 16)];
-// }
-
-function onSuccessfulLoad(data) {
-
-}

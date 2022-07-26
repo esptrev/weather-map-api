@@ -1,7 +1,6 @@
 *{
     margin: 0;
     padding: 0;
-    background-color: lightcyan;
 }
 
 body{
@@ -23,55 +22,104 @@ body{
 }
 #searchBox{
     width: inherit;
-    height: 3em;
+    height: 4rem;
     margin-top: 1em;
     margin-bottom: 1em;
+    padding: 2px;
 }
 #cardStack{
     display: flex;
-    background-color: gray;
+    /*background-color: gray;*/
 }
 #dayOfWeek{
     display: flex;
-    border-radius: 4px;
     margin: 2px;
 }
+
 #cardBody{
     margin: 6px;
-    border: #332d2d solid 2px;
-    background-color: #d9d7d7;
+    border: #808080 solid 2px;
     border-radius: 10px;
+    padding: .5rem;
+    background-size: cover;
 }
 #highLow{
-    border-radius: 2px;
     margin: 2px
 }
+
 #icon{
-    border-radius: 2px;
     margin: 2px
 }
+
 #forecast{
-    border-radius: 2px;
     margin: 2px
 }
+
 #wind{
-    border-radius: 2px;
     margin: 2px
 }
+
 #pressure{
-    border-radius: 2px;
     margin: 2px
 }
+
 #sun{
-    border-radius: 2px;
     margin: 2px
 }
+
 .footer{
-    background-color: lightgray;
+    /*background-color: lightgray;*/
 }
 
 #mapDiv{
     width: inherit;
     height: 600px;
 
+}
+
+.clear-day {
+    color: black;
+    background: linear-gradient(0deg, rgba(201, 246, 255, 1) 0%, rgba(151, 235, 244, 1) 25%, rgba(122, 229, 245, 1) 50%, rgba(101, 221, 239, 1) 75%, rgba(53, 214, 237, 1) 100%) no-repeat;
+}
+
+.clear {
+    color: black;
+    background-image: url("/img/clear.jpg");
+    background-repeat: no-repeat;
+}
+
+.nightTime {
+    color: white;
+    background: linear-gradient(0deg, rgba(1, 66, 109, 1) 0%, rgba(0, 58, 99, 1) 20%, rgba(1, 49, 85, 1) 40%, rgba(0, 39, 70, 1) 60%, rgba(0, 29, 55, 1) 80%, rgba(1, 22, 46, 1) 100%) no-repeat;
+}
+
+.stars {
+    color: white;
+    background-image: url("/img/stars.jpg");
+    background-repeat: no-repeat;
+}
+
+.cloudy {
+    /*background: linear-gradient(0deg, rgba(211, 211, 211, 1) 0%, rgba(158, 158, 158, 1) 45%, rgba(105, 105, 105, 1) 100%) no-repeat;*/
+    background-image: url("/img/clouds2.jpg");
+    background-repeat: no-repeat;
+    color: white;
+}
+
+.rain {
+    color: black;
+    /*background: linear-gradient(0deg, rgba(64, 108, 148, 1) 0%, rgba(99, 147, 164, 1) 25%, rgba(98, 148, 154, 1) 50%, rgba(76, 105, 114, 1) 75%, rgba(197, 240, 247, 1) 100%) no-repeat;*/
+    background-image: url("/img/rain.jpg");
+    background-repeat: no-repeat;
+}
+
+.storm {
+    background-image: url("/img/storm.jpg");
+    background-repeat: no-repeat;
+}
+
+.snow {
+    /*background: linear-gradient(0deg, rgba(224, 255, 255, 1) 0%, rgba(255, 250, 250, 1) 35%, rgba(192, 246, 251, 1) 68%, rgba(147, 231, 251, 1) 100%) no-repeat;*/
+    background-image: url("/img/snow.jpg");
+    background-repeat: no-repeat;
 }
