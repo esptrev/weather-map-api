@@ -28,13 +28,10 @@ $(document).ready(function () {
                 $('#currentCity').html(city);
             })
     }
-
     getStartCity(lat, long);
 
-
     /*CREATES MAP WITH OPTIONS*/
-
-    const map = (latitude, longitude) => {
+    const createMap = (latitude, longitude) => {
         mapboxgl.accessToken = TREVORS_MAP_TOKEN;
         let mapOptions = {
             container: 'mapDiv',
@@ -45,11 +42,19 @@ $(document).ready(function () {
         return new mapboxgl.Map(mapOptions);
     }
 
-    const geoCoder = () => new MapboxGeocoder({
-        accessToken: TREVORS_MAP_TOKEN,
-        placeholder: 'Weather Search',
-        mapboxgl: mapboxgl,
-    })
+    // const geoCoder = () => new MapboxGeocoder({
+    //     accessToken: TREVORS_MAP_TOKEN,
+    //     placeholder: 'Weather Search',
+    //     mapboxgl: mapboxgl,
+    // })
+    function createGeocoder(){
+        return new MapboxGeocoder({
+            accessToken: TREVORS_MAP_TOKEN,
+            mapboxgl: mapboxgl,
+            marker: false
+        });
+
+    }
 
 
 /*CONVERTS COMPASS BEARING TO NOMINAL HEADING*/
@@ -152,11 +157,10 @@ $(document).ready(function () {
 
     /* INITS PAGE---DONT REALLY NEED BUT SEE WHERE I END UP*/
     function initPage(lat, lon) {
-        map(lat, lon);
+        var map  = createMap(lat, lon);
         retrieveWeatherData(lat, lon);
-        let geocoder = geoCoder();
-        $('#searchBox').append(geocoder.onAdd(map));
-
+        var geocoder = createGeocoder();
+        $('#searchBox').append(geocoder.onAdd(map))
     }
 
     initPage(lat, long);

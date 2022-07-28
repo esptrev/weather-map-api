@@ -78,86 +78,17 @@ $(document).ready(function () {
     }
 
 
-    function dailyWeatherUpdates(weather) {
-        $(`#cardStack`).html('');
-        weather.forEach(function (day) {
-            console.log(day);
-            let dailyHTML = createDailyForecastHTML(day);
-            $(`#cardStack`).append(dailyHTML);
-        })
-
-    }
-
-    function convertToHeading(num) {
-        let val = Math.floor((num / 22.5) + 0.5);
-        compassHeading = ["N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"];
-        return compassHeading[(val % 16)];
-    }
-
-    /* LIMITS FORECAST TO 5 DAYS, OTHERWISE 8 DAYS COME BACK*/
-    function loopThroughWeatherData(weather){
-        $(`#cardStack`).html('');
-        for (let i = 0; i < 5; i++) {
-            $(`#cardStack`).append(createDailyWeatherCard(weather));
-        }
-    }
-
-    function destructureWeatherData(singleDay) {
-        const myDate = new Date(singleDay.dt * 1000).toString();
-        console.log(myDate)
-        return {
-            dayOfWeek: (myDate.slice(0, 3)),
-            highTemp: (parseInt(singleDay.temp.max)),
-            lowTemp: (parseInt(singleDay.temp.min)),
-            windSpeed: (parseInt(singleDay.wind_speed)),
-            windHeading: singleDay.wind_deg,
-            weatherIcon: `<img  src='http://openweathermap.org/img/wn/${singleDay.weather[0].icon}@2x.png' alt={cccc}>`,
-            sunsetTime: new Date(singleDay.sunset * 1000).toString(),
-            sunSet: sunsetTime.slice(16, 21),
-            sunriseTime: new Date(singleDay.sunrise * 1000).toString(),
-            sunRise: sunriseTime.slice(16, 21),
-            inchesOfMercury: (singleDay.pressure * 0.0295301).toFixed(2),
-        }
-    }
-
-    function createDailyWeatherCard(data) {
-        console.log(data);
-        let dailyWeather = destructureWeatherData(data);
-        var html =
-            `
-			<div class="col-12 col-sm-6 col-lg-3">
-				
-				<div id="cardBody" class="card-body clear">
-				    <div id="dayOfWeek" class="card-body">${dayOfWeek}</div>
-					<div id="highLow">H:${parsedHighTemp}°F / L:${parsedLowTemp}°F</div>
-					<div id="icon">${weatherIcon}</div>
-					<div id="forecast">${singleDay.weather[0].description}</div>
-					<div id="wind">Wind: ${windSpeed} mph / ${convertToHeading(windHeading)}</div>
-					<div id="pressure">Barometer: ${inchesOfMercury} inHg</div>
-					<div id="sun">Dawn: ${sunRise} -- Dusk: ${sunSet}</div>
-				</div>
-			</div>`;
-        return html;
-    }
 
 
-    // Function to set the card backgrounds
-// This is done with the icons
-    function setCardBackground(icon) {
-        if (icon === '13d') {
-            return 'snow' //snow
-        } else if (icon === '09D' || icon === '10d') {
-            return 'rain' // rain
-        } else if (icon === '11d') {
-            return 'storm'
-        } else if (icon === '02d' || icon === '04d' || icon === '05d') {
-            return 'cloudy' // cloud
-        } else if (icon === '01n') {
-            return 'stars'
-        } else {
-            return 'clear' // clear
-        }
-    }
+
+
+
+
+
+
+
+
+
 
 })();
 
