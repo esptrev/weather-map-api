@@ -1,28 +1,14 @@
-(function () {
+$(document).ready(function () {
     'use strict';
 
-    const showPosition = (position) => {
-        console.log(position);
-        return (position.coords.latitude + position.coords.longitude);
-    }
-
-    if(navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(showPosition);
-    }
 
     mapboxgl.accessToken = TREVORS_MAP_TOKEN;
     const OPTIMAL_ZOOM_LEVEL = 20;
     const STARTING_COORDS = [-98.4936, 29.4241];
-    const weatherURL = `http://api.openweathermap.org/data/2.5/onecall`;
+    var weatherURL = `https://api.openweathermap.org/data/2.5/onecall`;
     let dailyWeatherInfo = [];
     let compassHeading;
 
-    let weatherOptions = {
-        lat: 29.4241, /* i want coords to feed from map center */
-        lon: -98.4936,
-        appid: TREVORS_WEATHER_MAP_KEY,
-        units: "imperial"
-    };
 
     const map = new mapboxgl.Map({
         container: 'mapDiv', // container ID
@@ -46,12 +32,12 @@
     ////////MAPBOX GEOCODE CONTROLLER, COPIED DIRECTLY FROM WEBSITE//////////
 
     const geoCoder = new MapboxGeocoder({
-            accessToken: TREVORS_MAP_TOKEN,
-            zoom: OPTIMAL_ZOOM_LEVEL,
-            placeholder: 'Weather Search',
-            mapboxgl: mapboxgl,
+        accessToken: TREVORS_MAP_TOKEN,
+        zoom: OPTIMAL_ZOOM_LEVEL,
+        placeholder: 'Weather Search',
+        mapboxgl: mapboxgl,
 
-        })
+    })
 
     $('#searchBox').append(geoCoder.onAdd(map));
 
@@ -92,18 +78,6 @@
     }
 
 
-    function loadWeather() {
-        $.get(weatherURL, weatherOptions).done(function (data) {
-            console.log(data);
-            dailyWeatherInfo = data.daily;
-            console.log(dailyWeatherInfo);
-            // convertWeatherData(dailyWeatherInfo);
-            dailyWeatherUpdates(dailyWeatherInfo);
-
-        })
-
-    }
-
     function dailyWeatherUpdates(weather) {
         $(`#cardStack`).html('');
         weather.forEach(function (day) {
@@ -114,27 +88,43 @@
 
     }
 
-    function degToCompass(num) {
+    function convertToHeading(num) {
         let val = Math.floor((num / 22.5) + 0.5);
         compassHeading = ["N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"];
         return compassHeading[(val % 16)];
     }
 
-    function createDailyForecastHTML(singleDay) {
-        var myDate = new Date(singleDay.dt * 1000).toString();
-        var dayOfWeek = (myDate.slice(0,3));
-        var parsedHighTemp = (parseInt(singleDay.temp.max));
-        var parsedLowTemp = (parseInt(singleDay.temp.min));
-        var windSpeed = (parseInt(singleDay.wind_speed));
-        var windHeading = singleDay.wind_deg;
-        var weatherIcon = `<img  src='http://openweathermap.org/img/wn/${singleDay.weather[0].icon}@2x.png' alt={cccc}>`
-        var sunsetTime = new Date(singleDay.sunset * 1000).toString();
-        var sunSet = sunsetTime.slice(16,21);
-        var sunriseTime = new Date(singleDay.sunrise * 1000).toString();
-        var sunRise = sunriseTime.slice(16,21);
-        var inchesOfMercury = (singleDay.pressure * 0.0295301).toFixed(2);
-        // language = HTML
-        var html = `
+    /* LIMITS FORECAST TO 5 DAYS, OTHERWISE 8 DAYS COME BACK*/
+    function loopThroughWeatherData(weather){
+        $(`#cardStack`).html('');
+        for (let i = 0; i < 5; i++) {
+            $(`#cardStack`).append(createDailyWeatherCard(weather));
+        }
+    }
+
+    function destructureWeatherData(singleDay) {
+        const myDate = new Date(singleDay.dt * 1000).toString();
+        console.log(myDate)
+        return {
+            dayOfWeek: (myDate.slice(0, 3)),
+            highTemp: (parseInt(singleDay.temp.max)),
+            lowTemp: (parseInt(singleDay.temp.min)),
+            windSpeed: (parseInt(singleDay.wind_speed)),
+            windHeading: singleDay.wind_deg,
+            weatherIcon: `<img  src='http://openweathermap.org/img/wn/${singleDay.weather[0].icon}@2x.png' alt={cccc}>`,
+            sunsetTime: new Date(singleDay.sunset * 1000).toString(),
+            sunSet: sunsetTime.slice(16, 21),
+            sunriseTime: new Date(singleDay.sunrise * 1000).toString(),
+            sunRise: sunriseTime.slice(16, 21),
+            inchesOfMercury: (singleDay.pressure * 0.0295301).toFixed(2),
+        }
+    }
+
+    function createDailyWeatherCard(data) {
+        console.log(data);
+        let dailyWeather = destructureWeatherData(data);
+        var html =
+            `
 			<div class="col-12 col-sm-6 col-lg-3">
 				
 				<div id="cardBody" class="card-body clear">
@@ -142,16 +132,15 @@
 					<div id="highLow">H:${parsedHighTemp}°F / L:${parsedLowTemp}°F</div>
 					<div id="icon">${weatherIcon}</div>
 					<div id="forecast">${singleDay.weather[0].description}</div>
-					<div id="wind">Wind: ${windSpeed} mph / ${degToCompass(windHeading)}</div>
+					<div id="wind">Wind: ${windSpeed} mph / ${convertToHeading(windHeading)}</div>
 					<div id="pressure">Barometer: ${inchesOfMercury} inHg</div>
 					<div id="sun">Dawn: ${sunRise} -- Dusk: ${sunSet}</div>
 				</div>
-			</div>`
-
-
+			</div>`;
         return html;
-
     }
+
+
     // Function to set the card backgrounds
 // This is done with the icons
     function setCardBackground(icon) {
@@ -159,7 +148,7 @@
             return 'snow' //snow
         } else if (icon === '09D' || icon === '10d') {
             return 'rain' // rain
-        } else if ( icon === '11d') {
+        } else if (icon === '11d') {
             return 'storm'
         } else if (icon === '02d' || icon === '04d' || icon === '05d') {
             return 'cloudy' // cloud
