@@ -100,7 +100,6 @@ body{
 }
 
 .cloudy {
-    /*background: linear-gradient(0deg, rgba(211, 211, 211, 1) 0%, rgba(158, 158, 158, 1) 45%, rgba(105, 105, 105, 1) 100%) no-repeat;*/
     background-image: url("/img/clouds2.jpg");
     background-repeat: no-repeat;
     color: white;
@@ -108,7 +107,6 @@ body{
 
 .rain {
     color: black;
-    /*background: linear-gradient(0deg, rgba(64, 108, 148, 1) 0%, rgba(99, 147, 164, 1) 25%, rgba(98, 148, 154, 1) 50%, rgba(76, 105, 114, 1) 75%, rgba(197, 240, 247, 1) 100%) no-repeat;*/
     background-image: url("/img/rain.jpg");
     background-repeat: no-repeat;
 }
@@ -119,7 +117,6 @@ body{
 }
 
 .snow {
-    /*background: linear-gradient(0deg, rgba(224, 255, 255, 1) 0%, rgba(255, 250, 250, 1) 35%, rgba(192, 246, 251, 1) 68%, rgba(147, 231, 251, 1) 100%) no-repeat;*/
     background-image: url("/img/snow.jpg");
     background-repeat: no-repeat;
 }

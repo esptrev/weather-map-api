@@ -23,7 +23,9 @@ $(document).ready(function () {
     function getStartCity(lat, log) {
         reverseGeocode({lat: lat, lng: log}, TREVORS_MAP_TOKEN)
             .then(function (res) {
-                console.log(res);
+               let locationArr = (res.toString().split(','));
+               let city = locationArr[0];
+                $('#currentCity').html(city);
             })
     }
 
@@ -32,16 +34,23 @@ $(document).ready(function () {
 
     /*CREATES MAP WITH OPTIONS*/
 
-    const createMap = (latitude, longitude) => {
+    const map = (latitude, longitude) => {
         mapboxgl.accessToken = TREVORS_MAP_TOKEN;
         let mapOptions = {
             container: 'mapDiv',
             style: 'mapbox://styles/mapbox/streets-v11', // stylesheet location
             center: [longitude, latitude], // starting position [lng, lat]
-            zoom: 7 // starting zoom
+            zoom: 7, // starting zoom
         }
         return new mapboxgl.Map(mapOptions);
     }
+
+    const geoCoder = () => new MapboxGeocoder({
+        accessToken: TREVORS_MAP_TOKEN,
+        placeholder: 'Weather Search',
+        mapboxgl: mapboxgl,
+    })
+
 
 /*CONVERTS COMPASS BEARING TO NOMINAL HEADING*/
 
@@ -52,7 +61,7 @@ $(document).ready(function () {
     }
 
     function destructureWeatherData(singleDay) {
-        console.log(singleDay);
+
         const myDate = new Date(singleDay.dt * 1000).toString();
         const sunriseTime = new Date(singleDay.sunrise * 1000).toString();
         const sunsetTime = new Date(singleDay.sunset * 1000).toString();
@@ -69,7 +78,7 @@ $(document).ready(function () {
             sunSet: sunsetTime.slice(16, 21),
             sunRise: sunriseTime.slice(16, 21),
             inchesOfMercury: (singleDay.pressure * 0.0295301).toFixed(2),
-
+            backgroundClass: setCardBackground(singleDay.weather[0].icon),
         }
     }
 
@@ -78,11 +87,11 @@ $(document).ready(function () {
 
     function createDailyWeatherCard(data) {
         let dailyWeather = destructureWeatherData(data);
+
         var html =
             `
-			<div class="col-12 col-sm-6 col-lg-3">
-				
-				<div id="cardBody" class="card-body clear">
+			<div class="col-12 col-sm-6 col-lg-3 ">
+				<div id="cardBody" class="card-body ${dailyWeather.backgroundClass}">
 				    <div id="dayOfWeek" class="card-body">${dailyWeather.dayOfWeek}</div>
 					<div id="highLow">H:${dailyWeather.highTemp}°F / L:${dailyWeather.lowTemp}°F</div>
 					<div id="icon">${dailyWeather.weatherIcon}</div>
@@ -117,17 +126,37 @@ $(document).ready(function () {
 
         }).done(function (data) {
             const dailyData = data.daily;
-            console.log(dailyData)
             loopThroughWeatherData(dailyData);
         })
 
     }
 
+    /* SETS BACKGROUND IMAGE ON DAILY CARDS, USES WEATHER ICON TO PICK JPG */
+    function setCardBackground(icon) {
+
+        if (icon === '13d') {
+            return 'snow' //snow
+        } else if (icon === '09D' || icon === '10d') {
+            return 'rain' // rain
+        } else if (icon === '11d') {
+            return 'storm'
+        } else if (icon === '02d' || icon === '04d' || icon === '05d') {
+            return 'cloudy' // cloud
+        } else if (icon === '01n') {
+            return 'stars'
+        } else {
+            return 'clear' // clear
+        }
+    }
+
 
     /* INITS PAGE---DONT REALLY NEED BUT SEE WHERE I END UP*/
     function initPage(lat, lon) {
-        createMap(lat, lon);
+        map(lat, lon);
         retrieveWeatherData(lat, lon);
+        let geocoder = geoCoder();
+        $('#searchBox').append(geocoder.onAdd(map));
+
     }
 
     initPage(lat, long);
