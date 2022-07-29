@@ -25,7 +25,6 @@ $(document).ready(function () {
             var geoLat = e.result.geometry.coordinates[1];
             var geoLng =  e.result.geometry.coordinates[0];
             var city = e.result.place_name;
-
             pageRefresh(geoLat, geoLng, city , marker);
         });
     }
@@ -174,6 +173,20 @@ $(document).ready(function () {
         } else {
             return 'clear' // clear
         }
+    }
+
+    function makePopUpForCoords(coords) {
+        // console.log(coords);
+        /* coords from MAPBOX are an object, need to convert to array */
+        const coordArray = [coords.lng, coords.lat];
+        const popup = new mapboxgl.Popup({closeOnClick: false})
+            .setLngLat(coordArray)
+            .setHTML(`${coordArray}`)
+        weatherOptions.lat = coordArray[1];
+        weatherOptions.lon = coordArray[0];
+        marker.setPopup(popup);
+        popup.addTo(map);
+        loadWeather();
     }
 
 
