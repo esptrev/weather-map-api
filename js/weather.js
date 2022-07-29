@@ -1,5 +1,6 @@
 $(document).ready(function () {
     'use strict';
+    /*https://github.com/mapbox/mapbox-gl-geocoder/blob/main/API.md#on*/
 
     /*DEFAULT STARTING LOCATION---WILL BE OVERIDDEN WITH SHOWPOSITION IF SUPPORTED BY BROWSER */
     var lat = 29.424349;
@@ -19,14 +20,35 @@ $(document).ready(function () {
      */
 
 
-    /* RETURNS A START CITY BASED ON LAT/LONG ABOVE CALLS REVERSEGEO FROM API.JS  CAN UTILIZE SHOW POSITION WITH ASYNC/AWAIT */
+    function geocoderMonitor(geocoder, marker){
+        geocoder.on('result', function(e) {
+            var geoLat = e.result.geometry.coordinates[1];
+            var geoLng =  e.result.geometry.coordinates[0];
+            var city = e.result.place_name;
+
+            pageRefresh(geoLat, geoLng, city , marker);
+        });
+    }
+
+
+    /* KEEPS PAGE UPDATED */
+    function pageRefresh(latitude, longitude, city, marker){
+        retrieveWeatherData(latitude, longitude);
+        $('#current-city').html(city);
+        marker.setLngLat([longitude, latitude]);
+    }
+
+
+    /* RETURNS A START CITY BASED ON LAT/LONG ABOVE CALLS REVERSE GEO FROM API.JS  CAN UTILIZE SHOW POSITION WITH ASYNC/AWAIT */
     function getStartCity(lat, log) {
+        var city;
         reverseGeocode({lat: lat, lng: log}, TREVORS_MAP_TOKEN)
             .then(function (res) {
                let locationArr = (res.toString().split(','));
-               let city = locationArr[0];
+               city = locationArr[0];
                 $('#currentCity').html(city);
             })
+        return city;
     }
     getStartCity(lat, long);
 
@@ -42,31 +64,33 @@ $(document).ready(function () {
         return new mapboxgl.Map(mapOptions);
     }
 
-    // const geoCoder = () => new MapboxGeocoder({
-    //     accessToken: TREVORS_MAP_TOKEN,
-    //     placeholder: 'Weather Search',
-    //     mapboxgl: mapboxgl,
-    // })
-    function createGeocoder(){
-        return new MapboxGeocoder({
-            accessToken: TREVORS_MAP_TOKEN,
-            mapboxgl: mapboxgl,
-            marker: false
-        });
+    const createGeocoder = () => new MapboxGeocoder({
+        accessToken: TREVORS_MAP_TOKEN,
+        placeholder: 'Weather Search',
+        mapboxgl: mapboxgl,
+    })
 
+    //Creates marker
+    function createMarker(latitude, longitude, map){
+        var markerOptions = {
+            draggable: true
+        }
+        return new mapboxgl.Marker(markerOptions)
+            .setLngLat([longitude, latitude])
+            .addTo(map);
     }
 
 
 /*CONVERTS COMPASS BEARING TO NOMINAL HEADING*/
-
     function convertToHeading(num) {
         let val = Math.floor((num / 22.5) + 0.5);
         var compassHeading = ["N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"];
         return compassHeading[(val % 16)];
     }
 
-    function destructureWeatherData(singleDay) {
 
+    function destructureWeatherData(singleDay) {
+/* may script separate functions for these variables*/
         const myDate = new Date(singleDay.dt * 1000).toString();
         const sunriseTime = new Date(singleDay.sunrise * 1000).toString();
         const sunsetTime = new Date(singleDay.sunset * 1000).toString();
@@ -110,7 +134,6 @@ $(document).ready(function () {
     }
 
     /*LIMITS FORECAST TO 5 DAYS*/
-
     function loopThroughWeatherData(weather) {
         $(`#cardStack`).html('');
         for (let i = 0; i < 5; i++) {
@@ -119,7 +142,6 @@ $(document).ready(function () {
     }
 
     /*WEATHER CALL PLACED HERE DUE TO SCOPE---INSIDE DOC READY FUNC CANNOT BE CALLED FROM API.JS*/
-
     function retrieveWeatherData(lat, long) {
         $.get("https://api.openweathermap.org/data/2.5/onecall", {
 
@@ -157,12 +179,24 @@ $(document).ready(function () {
 
     /* INITS PAGE---DONT REALLY NEED BUT SEE WHERE I END UP*/
     function initPage(lat, lon) {
-        var map  = createMap(lat, lon);
+        let map  = createMap(lat, lon);
         retrieveWeatherData(lat, lon);
-        var geocoder = createGeocoder();
+        let geocoder = createGeocoder();
         $('#searchBox').append(geocoder.onAdd(map))
-    }
+        let marker = createMarker(lat, lon, map);
+        geocoderMonitor(geocoder, marker);
 
+        /*https://docs.mapbox.com/mapbox-gl-js/example/drag-a-marker/*/
+        function onDragEnd() {
+            var lngLat = marker.getLngLat();
+            var newLng = lngLat.lng;
+            var newLat = lngLat.lat;
+            var city = getStartCity(newLat, newLng)
+            pageRefresh(newLat, newLng, city, marker);
+        }
+        marker.on('dragend', onDragEnd);
+
+    }
     initPage(lat, long);
 
 
